@@ -6,9 +6,9 @@ import org.springframework.web.bind.annotation.*;
 @FeignClient(name = "auth-service", url = "http://localhost:8081")
 public interface AuthClient {
 
-    @GetMapping("/api/users/{id}/exists")
+    @GetMapping("/api/usuarios/{id}/exists")
     Boolean existsUserById(@PathVariable("id") Long id);
 
-    @GetMapping("/api/users/{id}/role")
+    @GetMapping("/api/usuarios/{id}/role")
     String getUserRole(@PathVariable("id") Long id);
 }
