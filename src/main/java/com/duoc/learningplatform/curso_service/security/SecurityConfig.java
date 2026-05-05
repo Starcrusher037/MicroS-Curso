@@ -16,9 +16,18 @@ public class SecurityConfig {
 
         http
             .csrf(csrf -> csrf.disable())
+            .headers(headers -> headers.frameOptions().disable()) // para H2
+
             .authorizeHttpRequests(auth -> auth
+                //  endpoints públicos (comunicación interna y herramientas) bypass
+                .requestMatchers("/api/cursos/*/exists").permitAll()
+                .requestMatchers("/h2-console/**").permitAll()
+
+                //  todo lo demás requiere autenticación
                 .anyRequest().authenticated()
             )
+
+            //  filtro JWT
             .addFilterBefore(new JwtAuthenticationFilter(jwtUtil),
                     UsernamePasswordAuthenticationFilter.class);
 

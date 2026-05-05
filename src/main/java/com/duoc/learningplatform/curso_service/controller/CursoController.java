@@ -69,4 +69,10 @@ public class CursoController {
                 ? ResponseEntity.noContent().build()
                 : ResponseEntity.notFound().build();
     }
+
+    @GetMapping("/{id}/exists")
+    public ResponseEntity<Boolean> existeCurso(@PathVariable Long id) {
+        boolean existe = cursoService.obtenerCursoPorId(id).isPresent();
+        return ResponseEntity.ok(existe);
+}
 }

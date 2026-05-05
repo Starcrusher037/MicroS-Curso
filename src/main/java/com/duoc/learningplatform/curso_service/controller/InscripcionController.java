@@ -44,7 +44,6 @@ public class InscripcionController {
                 .path("/{id}")
                 .buildAndExpand(creada.getId())
                 .toUri();
-
         return ResponseEntity.created(location).body(creada);
     }
 
