@@ -2,6 +2,7 @@ package com.duoc.learningplatform.curso_service.security;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
@@ -16,18 +17,23 @@ public class SecurityConfig {
 
         http
             .csrf(csrf -> csrf.disable())
-            .headers(headers -> headers.frameOptions().disable()) // para H2
+            .headers(headers -> headers.frameOptions().disable())
 
             .authorizeHttpRequests(auth -> auth
-                //  endpoints públicos (comunicación interna y herramientas) bypass
                 .requestMatchers("/api/cursos/*/exists").permitAll()
                 .requestMatchers("/h2-console/**").permitAll()
 
-                //  todo lo demás requiere autenticación
+                // cursos
+                .requestMatchers(HttpMethod.POST, "/api/cursos/**").hasRole("PROFESOR")
+                .requestMatchers(HttpMethod.PUT, "/api/cursos/**").hasRole("PROFESOR")
+                .requestMatchers(HttpMethod.DELETE, "/api/cursos/**").hasRole("PROFESOR")
+
+                // inscripciones
+                .requestMatchers(HttpMethod.POST, "/api/inscripciones/**").hasRole("ALUMNO")
+
                 .anyRequest().authenticated()
             )
 
-            //  filtro JWT
             .addFilterBefore(new JwtAuthenticationFilter(jwtUtil),
                     UsernamePasswordAuthenticationFilter.class);
 

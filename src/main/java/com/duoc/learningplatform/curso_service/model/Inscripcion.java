@@ -10,7 +10,12 @@ import java.time.LocalDate;
 
 @Data
 @Entity
-@Table(name = "inscripcion")
+@Table(
+    name = "inscripcion",
+    uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"cursoId", "estudianteId"})
+    }
+)
 @NoArgsConstructor
 @AllArgsConstructor
 public class Inscripcion {
@@ -19,9 +24,11 @@ public class Inscripcion {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @NotNull
     @Min(1)
     private Long cursoId;
 
+    @NotNull
     @Min(1)
     private Long estudianteId;
 

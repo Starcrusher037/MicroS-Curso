@@ -31,9 +31,7 @@ public class CursoController {
 
     @GetMapping("/{id}")
     public ResponseEntity<Curso> obtenerCursoPorId(@PathVariable @Positive Long id) {
-        return cursoService.obtenerCursoPorId(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(cursoService.obtenerCursoPorId(id));
     }
 
     @PostMapping
@@ -56,23 +54,19 @@ public class CursoController {
             @PathVariable @Positive Long id,
             @Valid @RequestBody Curso curso) {
 
-        return cursoService.modificarCurso(id, curso)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+        return ResponseEntity.ok(cursoService.modificarCurso(id, curso));
     }
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('PROFESOR')")
     public ResponseEntity<Void> eliminarCurso(@PathVariable @Positive Long id) {
 
-        return cursoService.eliminarCurso(id)
-                ? ResponseEntity.noContent().build()
-                : ResponseEntity.notFound().build();
+        cursoService.eliminarCurso(id);
+        return ResponseEntity.noContent().build();
     }
 
     @GetMapping("/{id}/exists")
     public ResponseEntity<Boolean> existeCurso(@PathVariable Long id) {
-        boolean existe = cursoService.obtenerCursoPorId(id).isPresent();
-        return ResponseEntity.ok(existe);
-}
+        return ResponseEntity.ok(cursoService.existeCurso(id));
+    }
 }

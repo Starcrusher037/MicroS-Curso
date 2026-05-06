@@ -2,13 +2,12 @@ package com.duoc.learningplatform.curso_service.service;
 
 import com.duoc.learningplatform.curso_service.client.AuthClient;
 import com.duoc.learningplatform.curso_service.exception.BadRequestException;
-import com.duoc.learningplatform.curso_service.exception.ResourceNotFoundException;
+import com.duoc.learningplatform.curso_service.exception.NotFoundException;
 import com.duoc.learningplatform.curso_service.model.Curso;
 import com.duoc.learningplatform.curso_service.repository.CursoRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class CursoService {
@@ -27,8 +26,9 @@ public class CursoService {
         return cursoRepository.findAll();
     }
 
-    public Optional<Curso> obtenerCursoPorId(Long id) {
-        return cursoRepository.findById(id);
+    public Curso obtenerCursoPorId(Long id) {
+        return cursoRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Curso no encontrado"));
     }
 
     public Curso registrarCurso(Curso curso) {
@@ -36,7 +36,7 @@ public class CursoService {
         Boolean existe = authClient.existsUserById(curso.getProfesorId());
 
         if (existe == null || !existe) {
-            throw new ResourceNotFoundException("Profesor no existe");
+            throw new NotFoundException("Profesor no existe");
         }
 
         String rol = authClient.getUserRole(curso.getProfesorId());
@@ -48,16 +48,15 @@ public class CursoService {
         return cursoRepository.save(curso);
     }
 
-    public Optional<Curso> modificarCurso(Long id, Curso curso) {
+    public Curso modificarCurso(Long id, Curso curso) {
 
-        if (!cursoRepository.existsById(id)) {
-            return Optional.empty();
-        }
+        Curso cursoExistente = cursoRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Curso no encontrado"));
 
         Boolean existe = authClient.existsUserById(curso.getProfesorId());
 
         if (existe == null || !existe) {
-            throw new ResourceNotFoundException("Profesor no existe");
+            throw new NotFoundException("Profesor no existe");
         }
 
         String rol = authClient.getUserRole(curso.getProfesorId());
@@ -66,15 +65,23 @@ public class CursoService {
             throw new BadRequestException("El usuario no tiene rol PROFESOR");
         }
 
-        curso.setId(id);
-        return Optional.of(cursoRepository.save(curso));
+        cursoExistente.setNombre(curso.getNombre());
+        cursoExistente.setDescripcion(curso.getDescripcion());
+        cursoExistente.setProfesorId(curso.getProfesorId());
+
+        return cursoRepository.save(cursoExistente);
     }
 
-    public boolean eliminarCurso(Long id) {
+    public void eliminarCurso(Long id) {
+
         if (!cursoRepository.existsById(id)) {
-            return false;
+            throw new NotFoundException("Curso no encontrado");
         }
+
         cursoRepository.deleteById(id);
-        return true;
+    }
+
+    public boolean existeCurso(Long id) {
+        return cursoRepository.existsById(id);
     }
 }

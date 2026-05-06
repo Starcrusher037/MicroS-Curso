@@ -49,11 +49,9 @@ public class InscripcionController {
 
     @DeleteMapping("/{id}")
     @PreAuthorize("hasRole('ALUMNO')")
-    public ResponseEntity<Void> eliminarInscripcion(
-            @PathVariable @Positive Long id) {
-
-        return inscripcionService.eliminarInscripcion(id)
-                ? ResponseEntity.noContent().build()
-                : ResponseEntity.notFound().build();
+    public ResponseEntity<Void> eliminarInscripcion(@PathVariable @Positive Long id) {
+        inscripcionService.eliminarInscripcion(id);
+        return ResponseEntity.noContent().build();
     }
+    
 }

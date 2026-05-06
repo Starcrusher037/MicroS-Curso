@@ -2,7 +2,7 @@ package com.duoc.learningplatform.curso_service.service;
 
 import com.duoc.learningplatform.curso_service.client.AuthClient;
 import com.duoc.learningplatform.curso_service.exception.BadRequestException;
-import com.duoc.learningplatform.curso_service.exception.ResourceNotFoundException;
+import com.duoc.learningplatform.curso_service.exception.NotFoundException;
 import com.duoc.learningplatform.curso_service.model.Inscripcion;
 import com.duoc.learningplatform.curso_service.repository.CursoRepository;
 import com.duoc.learningplatform.curso_service.repository.InscripcionRepository;
@@ -30,7 +30,7 @@ public class InscripcionService {
     public List<Inscripcion> obtenerInscripcionesCursoId(Long cursoId) {
 
         if (!cursoRepository.existsById(cursoId)) {
-            throw new ResourceNotFoundException("El curso no existe");
+            throw new NotFoundException("El curso no existe");
         }
 
         return inscripcionRepository.findByCursoId(cursoId);
@@ -39,13 +39,13 @@ public class InscripcionService {
     public Inscripcion registrarInscripcion(Inscripcion inscripcion) {
 
         if (!cursoRepository.existsById(inscripcion.getCursoId())) {
-            throw new ResourceNotFoundException("El curso no existe");
+            throw new NotFoundException("El curso no existe");
         }
 
         Boolean existe = authClient.existsUserById(inscripcion.getEstudianteId());
 
         if (existe == null || !existe) {
-            throw new ResourceNotFoundException("Estudiante no existe");
+            throw new NotFoundException("Estudiante no existe");
         }
 
         String rol = authClient.getUserRole(inscripcion.getEstudianteId());
@@ -54,14 +54,22 @@ public class InscripcionService {
             throw new BadRequestException("El usuario no tiene rol ALUMNO");
         }
 
+        if (inscripcionRepository.existsByCursoIdAndEstudianteId(
+                inscripcion.getCursoId(),
+                inscripcion.getEstudianteId())) {
+            throw new BadRequestException("El estudiante ya está inscrito en este curso");
+        }
+
         return inscripcionRepository.save(inscripcion);
     }
 
-    public boolean eliminarInscripcion(Long id) {
-        if (inscripcionRepository.existsById(id)) {
-            inscripcionRepository.deleteById(id);
-            return true;
+    
+    public void eliminarInscripcion(Long id) {
+
+        if (!inscripcionRepository.existsById(id)) {
+            throw new NotFoundException("Inscripción no encontrada");
         }
-        return false;
+
+        inscripcionRepository.deleteById(id);
     }
 }
